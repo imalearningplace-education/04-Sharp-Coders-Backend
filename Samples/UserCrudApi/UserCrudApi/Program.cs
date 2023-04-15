@@ -4,10 +4,14 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var UserCrudConnectionString = builder.Configuration.GetConnectionString("UserCrudApiConnectionString");
+var UserCrudConnectionString = builder
+    .Configuration
+    .GetConnectionString("UserCrudApiConnectionString");
 
 builder.Services.AddDbContext<UserCrudContext>(options =>
-    options.UseMySql(
+    options
+    .UseLazyLoadingProxies()
+    .UseMySql(
         connectionString: UserCrudConnectionString,
         serverVersion: ServerVersion.AutoDetect(UserCrudConnectionString)
     )

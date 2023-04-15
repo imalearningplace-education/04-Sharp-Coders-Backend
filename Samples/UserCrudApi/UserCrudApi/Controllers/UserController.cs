@@ -4,6 +4,8 @@ using Domain.Model;
 using Microsoft.AspNetCore.Mvc;
 using Domain.Dto;
 using AutoMapper;
+using System.Net;
+using Microsoft.Win32;
 
 namespace UserCrudApi.Controllers;
 
@@ -24,9 +26,7 @@ public class UserController : ControllerBase {
         var users = _context
             .Users
             .Where(user => user.IsActive)
-            .Select(user =>
-                _mapper.Map<UserProfileDto>(user)
-            )
+            .Select(user => _mapper.Map<UserViewDto>(user))
             .ToList();
 
         if (users.Count == 0)
@@ -48,19 +48,59 @@ public class UserController : ControllerBase {
             Message = $"Cannot find user with id = {id}."
         });
 
-        var userProfile = _mapper.Map<UserProfileDto>(user);
+        var userProfile = _mapper.Map<UserViewDto>(user);
         return Ok(userProfile);
     }
 
     [HttpPost]
-    public IActionResult RegisterUser(
-        [FromBody] UserRegisterDto userRegisterDto
+    [Route("register")]
+    public IActionResult UserRegister(
+        [FromBody] UserRegisterDto register
     ) {
-        var user = _mapper.Map<User>(userRegisterDto);
+        var isEmailAlreadyRegistered = _context
+            .Users
+            .Any(user => user.Email == register.Email);
+
+        if (isEmailAlreadyRegistered)
+            return StatusCode(
+                statusCode: (int)HttpStatusCode.NotAcceptable,
+                value: new {
+                    Message = $"The email: {register.Email} is already registered",
+                    Moment = DateTime.Now
+                });
+
+        var user = _mapper.Map<User>(register);
+        user.Password = BCrypt.Net.BCrypt.HashPassword(register.Password);
+
         _context.Users.Add(user);
         _context.SaveChanges();
-        var userProfile = _mapper.Map<UserProfileDto>(user);
+        var userProfile = _mapper.Map<UserViewDto>(user);
 
-        return CreatedAtAction(nameof(GetById), new { Id = user.Id }, userProfile );    
+        return CreatedAtAction(nameof(GetById), new { Id = user.Id }, userProfile);
+    }
+
+    [HttpPost]
+    [Route("login")]
+    public IActionResult UserLogin(
+        [FromBody] UserLoginDto login
+    ) {
+        var user = _context.Users.FirstOrDefault(user => user.Email == login.Email);
+
+        var isNotEmailRegistered = (user == null);
+        var errorResponse = StatusCode(
+            statusCode: (int)HttpStatusCode.Unauthorized,
+            value: new {
+                Message = $"Email and Password didn't match",
+                Moment = DateTime.Now
+        });
+
+        if (isNotEmailRegistered) return errorResponse;
+
+        var isNotAuthorized = !BCrypt.Net.BCrypt.Verify(login.Password, user.Password);
+
+        if (isNotAuthorized) return errorResponse;
+
+        var userView = _mapper.Map<UserViewDto>(user);
+        return CreatedAtAction(nameof(GetById), new { Id = user.Id }, userView);
     }
 }

@@ -55,3 +55,4 @@ C:\Aulas\Turmas\Sharp Coders\Dotnet_APIs\Samples\UserCrudApi\UserCrudApi\obj\Deb
 C:\Aulas\Turmas\Sharp Coders\Dotnet_APIs\Samples\UserCrudApi\UserCrudApi\bin\Debug\net6.0\AutoMapper.dll
 C:\Aulas\Turmas\Sharp Coders\Dotnet_APIs\Samples\UserCrudApi\UserCrudApi\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
 C:\Aulas\Turmas\Sharp Coders\Dotnet_APIs\Samples\UserCrudApi\UserCrudApi\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Aulas\Turmas\Sharp Coders\Dotnet_APIs\Samples\UserCrudApi\UserCrudApi\bin\Debug\net6.0\BCrypt.Net.dll

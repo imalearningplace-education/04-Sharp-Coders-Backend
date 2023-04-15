@@ -15,4 +15,8 @@ public class User : Entity {
 
     public bool IsActive { get; set; } = true;
 
+    public int? AddressId { get; set; }
+
+    public virtual Address? Address { get; set; }
+
 }
